@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'employee_list' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Quay lại
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Mã nhân viên <span class="text-danger">*</span></label>
+                            {{ form.employee_id }}
+                            {% if form.employee_id.errors %}
+                                <div class="text-danger small">{{ form.employee_id.errors }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Họ <span class="text-danger">*</span></label>
+                            {{ form.last_name }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Tên <span class="text-danger">*</span></label>
+                            {{ form.first_name }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Giới tính</label>
+                            {{ form.gender }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Ngày sinh <span class="text-danger">*</span></label>
+                            {{ form.date_of_birth }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">CMND/CCCD</label>
+                            {{ form.national_id }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Điện thoại <span class="text-danger">*</span></label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                            {{ form.email }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Địa chỉ</label>
+                            {{ form.address }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Phòng ban</label>
+                            {{ form.department }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Chức vụ <span class="text-danger">*</span></label>
+                            {{ form.position }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Lương cơ bản</label>
+                            {{ form.basic_salary }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Ngày vào làm <span class="text-danger">*</span></label>
+                            {{ form.hire_date }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Ngày nghỉ việc</label>
+                            {{ form.end_date }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Trạng thái</label>
+                            {{ form.status }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Ảnh đại diện</label>
+                            {{ form.photo }}
+                        </div>
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger mt-3">{{ form.non_field_errors }}</div>
+                    {% endif %}
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-2"></i>Lưu
+                        </button>
+                        <a href="{% url 'employee_list' %}" class="btn btn-outline-secondary">Hủy</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
