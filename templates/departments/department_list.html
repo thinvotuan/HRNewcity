@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Phòng ban{% endblock %}
+{% block page_title %}Quản lý phòng ban{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'department_create' %}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-circle me-1"></i>Thêm phòng ban
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    {% for dept in departments %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card shadow-sm border-0 rounded-3 h-100">
+            <div class="card-body p-4">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <div class="fw-bold fs-6">{{ dept.name }}</div>
+                        <code class="text-primary small">{{ dept.code }}</code>
+                    </div>
+                    <div class="btn-group btn-group-sm">
+                        <a href="{% url 'department_detail' dept.pk %}" class="btn btn-outline-primary" title="Chi tiết">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{% url 'department_update' dept.pk %}" class="btn btn-outline-warning" title="Sửa">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'department_delete' dept.pk %}" class="btn btn-outline-danger" title="Xóa">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                    </div>
+                </div>
+                {% if dept.description %}
+                <p class="text-muted small mb-3">{{ dept.description|truncatewords:20 }}</p>
+                {% endif %}
+                <div class="d-flex gap-4 mt-auto">
+                    <div class="text-center">
+                        <div class="fw-bold text-primary fs-5">{{ dept.employees.count }}</div>
+                        <div class="text-muted" style="font-size:0.75rem;">Nhân viên</div>
+                    </div>
+                    {% if dept.manager %}
+                    <div>
+                        <div class="text-muted" style="font-size:0.75rem;">Trưởng phòng</div>
+                        <div class="small fw-semibold">{{ dept.manager.full_name }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="text-center py-5 text-muted">
+            <i class="bi bi-inbox display-3 d-block mb-3"></i>
+            <h5>Chưa có phòng ban nào</h5>
+            <a href="{% url 'department_create' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Thêm phòng ban
+            </a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

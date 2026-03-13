@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Chi tiết đơn nghỉ phép{% endblock %}
+{% block page_title %}Chi tiết đơn nghỉ phép{% endblock %}
+
+{% block top_actions %}
+<a href="{% url 'leave_request_list' %}" class="btn btn-outline-secondary btn-sm">
+    <i class="bi bi-arrow-left me-1"></i>Quay lại
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 rounded-3 mb-4">
+            <div class="card-body p-4">
+                <h6 class="fw-bold mb-3">Thông tin đơn</h6>
+                <dl class="row">
+                    <dt class="col-4 text-muted">Nhân viên</dt>
+                    <dd class="col-8 fw-semibold">
+                        <a href="{% url 'employee_detail' leave_request.employee.pk %}" class="text-decoration-none">
+                            {{ leave_request.employee.full_name }}
+                        </a>
+                    </dd>
+                    <dt class="col-4 text-muted">Loại nghỉ</dt>
+                    <dd class="col-8">{{ leave_request.leave_type }}</dd>
+                    <dt class="col-4 text-muted">Từ ngày</dt>
+                    <dd class="col-8">{{ leave_request.start_date|date:"d/m/Y" }}</dd>
+                    <dt class="col-4 text-muted">Đến ngày</dt>
+                    <dd class="col-8">{{ leave_request.end_date|date:"d/m/Y" }}</dd>
+                    <dt class="col-4 text-muted">Số ngày</dt>
+                    <dd class="col-8"><strong>{{ leave_request.days_count }}</strong> ngày</dd>
+                    <dt class="col-4 text-muted">Trạng thái</dt>
+                    <dd class="col-8">
+                        {% if leave_request.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Chờ duyệt</span>
+                        {% elif leave_request.status == 'approved' %}
+                            <span class="badge badge-status-active">Đã duyệt</span>
+                        {% elif leave_request.status == 'rejected' %}
+                            <span class="badge badge-status-inactive">Từ chối</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Đã hủy</span>
+                        {% endif %}
+                    </dd>
+                    <dt class="col-4 text-muted">Lý do</dt>
+                    <dd class="col-8">{{ leave_request.reason }}</dd>
+                    {% if leave_request.approved_by %}
+                    <dt class="col-4 text-muted">Người duyệt</dt>
+                    <dd class="col-8">{{ leave_request.approved_by.full_name }}</dd>
+                    <dt class="col-4 text-muted">Ngày duyệt</dt>
+                    <dd class="col-8">{{ leave_request.approved_at|date:"d/m/Y H:i" }}</dd>
+                    {% endif %}
+                    {% if leave_request.rejection_reason %}
+                    <dt class="col-4 text-muted">Lý do từ chối</dt>
+                    <dd class="col-8 text-danger">{{ leave_request.rejection_reason }}</dd>
+                    {% endif %}
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 rounded-3">
+            <div class="card-header bg-white border-0 pt-3 px-4">
+                <h6 class="fw-bold mb-0">Duyệt / Từ chối</h6>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" action="{% url 'leave_request_approve' leave_request.pk %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Trạng thái</label>
+                        {{ approval_form.status }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Người duyệt</label>
+                        {{ approval_form.approved_by }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Lý do từ chối (nếu có)</label>
+                        {{ approval_form.rejection_reason }}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-check-circle me-2"></i>Cập nhật trạng thái
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
