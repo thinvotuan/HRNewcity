@@ -1,0 +1,95 @@
+﻿@using BatDongSan.Models.PhieuDeNghi;
+@{
+    int i = 1;
+}
+<style>
+    .listNghiPhep {
+    }
+
+        .listNghiPhep li {
+            display: block;
+            line-height: 1.7;
+            clear: both;
+            float: none;
+        }
+
+            .listNghiPhep li span {
+                float: left;
+            }
+
+                .listNghiPhep li span:nth-child(1) {
+                    color: green;
+                    min-width: 50px;
+                }
+
+    .formatTable table {
+        max-width: 100% !important;
+    }
+</style>
+<table class="table table-striped table-hover table-condensed TableMobile TablePhieuNghiPhep" id="maintable">
+    <thead>
+        <tr>
+            <th style="width: 40px">STT</th>
+            <th style="width: 150px">Số phiếu</th>
+            <th style="min-width: 200px;">Tỉnh thành</th>
+            <th style="max-width: 350px;">Quận huyện</th>
+            <th style="max-width: 350px;">Phường/Xã</th>
+            <th style="width: 100px"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            BatDongSan.Models.HeThong.Sys_User user1 = new BatDongSan.Models.HeThong.Sys_User();
+            if (Session["User"] != null)
+            {
+                user1 = (BatDongSan.Models.HeThong.Sys_User)Session["User"];
+            }
+        }
+
+
+        @{
+            var ls = ViewData["lsDanhSach"] as List<NS_KhaiBaoYTe_Index_GroupResult>;
+            foreach (var item in ls.ToList())
+            { 
+            <tr>
+                @if (item.LV == 0)
+                {
+                    <td style="text-align: center;font-weight:bold">@i</td>
+                    <td colspan="5" style="font-weight: bold">
+                        <i class="fa fa-user"></i>@item.TenNhanVien<br />
+                        <i class="fa fa-credit-card" aria-hidden="true"></i>@item.NguoiLap
+                    </td>
+                    i++;
+                }
+                else
+                {
+                    <td></td>
+                    <td>
+                        <i class="fa fa-clipboard"></i><a style="color:blue" href="@Url.Action("Edit", "PhieuKeKhaiYTe", new { id = item.MaPhieu })">@item.MaPhieu</a><br />
+                        <i class="fa fa-calendar" aria-hidden="true"></i>@String.Format("{0: dd/MM/yyyy}", item.NgayLap)
+                    </td>
+                   
+                    <td>
+                        @item.TenTinhThanh
+                    </td>
+                    <td>
+                        @item.TenQuanHuyen
+                    </td>
+                    <td>
+                        @item.TenPhuongXa
+                    </td>
+
+                    <td style="text-align: center">
+                        @if (((item.XacNhan ?? false) == false))
+                        {
+                            <a href="@Url.Action("Edit", "PhieuKeKhaiYTe", new { id = item.MaPhieu })" title ="Sửa phiếu"><i class="fa fa-pencil-square-o" style="font-size: 30px; color: orange;" aria-hidden="true">| </i></a>                         
+                            <a class="btnDelete" alt="@item.MaPhieu" title ="Xoá phiếu"><i class="fa fa-trash" style="font-size: 30px; color: red; cursor: pointer;" aria-hidden="true"></i></a>                            
+                        }
+
+                    </td>
+                }
+            </tr>  
+            }
+        }
+    </tbody>
+</table>

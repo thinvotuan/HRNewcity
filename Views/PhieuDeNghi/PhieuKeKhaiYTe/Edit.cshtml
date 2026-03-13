@@ -1,0 +1,681 @@
+﻿@using BatDongSan.Models.PhieuDeNghi;
+@model PhieuKeKhaiYTeModel
+@{
+    ViewBag.Title = "TỜ KHAI Y TẾ - THUẬN VIỆT";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/Content/summernote/summernote.css" />
+<script src="~/Content/summernote/summernote.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Content/bootstrap/js/bootstrap.min.js"></script>
+<script src="~/Scripts/additional-methods.min.js"></script>
+<script src="~/Scripts/autoNumeric.js"></script>
+<script src="~/Scripts/batdongsan.validate.js"></script>
+<script src="~/Scripts/moment.min.js"></script>
+<script src="~/Scripts/vi.js"></script>
+<script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
+<link rel="stylesheet" href="~/Content/bootstrap-datetimepicker.min.css" />
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".numberinput").autoNumeric('init', { mDec: 1, mNum: 3, lZero: 'deny', aSep: ',', aDec: '.', pSign: 's', vMin: '-1000' });
+        $(".numberinputInt").autoNumeric('init', { lZero: 'deny', mDec: 0, pSign: 's', aSep: ',', aDec: '.' });
+        $("#btnTroVe").click(function () {
+            var url = "@Url.Action("Index")";
+            location.href = url;
+
+        });
+
+        $(".datepicker").datetimepicker({
+            locale: 'vi',
+            format: 'DD/MM/YYYY',
+            useCurrent: false
+        });
+
+        $("#btnSubmit").click(function () {
+            var flag = CheckForm();
+            if (flag) {
+                $("#form-submit").submit();
+            }
+        });
+
+        $("#btnXacNhan").click(function () {
+            bootbox.confirm("Bạn chắc chắn gửi khai báo y tế này đến phòng hành chính nhân sự", function (result) {
+                if (result) {
+                    var url = '@Url.Action("XacNhanKhaiBaoYT", "PhieuKeKhaiYTe")' + '/' + $("#MaPhieu").val();
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: 'json',
+                        success: function () {
+                            Alert.success("Gửi khai báo y tế này đến phòng hành chính nhân sự", "Thông báo", { displayDuration: 2000 });
+                            $("#btnXacNhan").hide();
+                            $("#btnSubmit").hide();
+                        },
+                        error: function () {
+                            Alert.success("Gửi khai báo y tế này đến phòng hành chính nhân sự thất bại", "Thông báo", { displayDuration: 2000 });
+                            $(".pageLoading").hide();
+                        }
+                    })
+
+
+                }
+            });
+        });
+
+
+        $("#MaTinhThanh").change(function () {
+            var quanHuyen = $("#MaQuanHuyen");
+            quanHuyen.empty();
+            $.ajax({
+                url: "/PhieuKeKhaiYTe/GetQuanHuyen/" + this.value,
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    var textAppend = "<option value=''>[Vui lòng chọn quận/huyện]</option>";
+                    $.each(data, function (i, quanHuyen) {
+                        textAppend += "<option value=" + quanHuyen.id + ">" + quanHuyen.tenQuanHuyen + "</option>";
+                    });
+                    quanHuyen.append(textAppend);
+                }
+            });
+        });
+
+        $("#ChooseNV").click(function () {
+            ChonNhanVien();
+        });
+
+        $("input[name='TrangThaiTiepXuc']").click(function () {
+            var radioValue = $("input[name='TrangThaiTiepXuc']:checked").val();
+            if (radioValue == "True") {
+                $(".trNgayTiepXuc").show();
+            }
+            else {
+                $(".trNgayTiepXuc").hide();
+            }
+        });
+
+        $("input[name='TrangThaiPhongToaTaiKhuVucMinhSong']").click(function () {
+            var radioValue = $("input[name='TrangThaiPhongToaTaiKhuVucMinhSong']:checked").val();
+            if (radioValue == "True") {
+                $(".trPhongToan").show();
+            }
+            else {
+                $(".trPhongToan").hide();
+            }
+        });
+
+        $("input[name='TrangThaiLayMauXetNghiem']").click(function () {
+            var radioValue = $("input[name='TrangThaiLayMauXetNghiem']:checked").val();
+            if (radioValue == "True") {
+                $(".trLayMauXetNghiem").show();
+            }
+            else {
+                $(".trLayMauXetNghiem").hide();
+            }
+        });
+
+        $("input[name='TrangThaiPhongToaGan']").click(function () {
+            var radioValue = $("input[name='TrangThaiPhongToaGan']:checked").val();
+            if (radioValue == "True") {
+                $(".trGhiChuPhongToa").show();
+            }
+            else {
+                $(".trGhiChuPhongToa").hide();
+            }
+        });
+
+
+
+    });
+
+
+    function ChonNhanVien() {
+        var url = ('@Url.Action("DanhSachNVPB/", "PhieuKeKhaiYTe")');
+        PopUpManager(url, "DUYET", 800, 500);
+    }
+
+    function PopUpManager(url, title, w, h) {
+        var left = (screen.width / 2) - (w / 2);
+        var top = (screen.height / 2) - (h / 2);
+        var targetWin = window.open(url, title, 'width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+    }
+
+    function CheckForm() {
+        debugger;
+        var flag = true;
+        if ($("#DiaChiHienNay").val() == "") {
+            $("#DiaChiHienNay").addClass("error").attr("title", "Xin vui lòng nhập địa chỉ hiện nay");
+            flag = false;
+
+        }
+
+        if ($("#MaTinhThanh").val() == "") {
+            $("#MaTinhThanh").addClass("error").attr("title", "Vui lòng tỉnh thành.");
+            flag = false;
+        }
+
+        if ($("#MaQuanHuyen").val() == "0" || $("#MaQuanHuyen").val() == "") {
+            $("#MaQuanHuyen").addClass("error").attr("title", "Vui lòng chọn quận huyện.");
+            flag = false;
+        }
+
+        if ($("#TenPhuongXa").val() == "") {
+            $("#TenPhuongXa").addClass("error").attr("title", "Vui lòng nhập phường xã.");
+            flag = false;
+        }
+
+        if ($("#DienThoai").val() == "") {
+            $("#DienThoai").addClass("error").attr("title", "Vui lòng nhập điện thoại.");
+            flag = false;
+        }
+
+        if ($("[name='GioiTinh']:checked").length == 0) {
+            flag = false;
+            $("[name='GioiTinh']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='GioiTinh']").focus(function () {
+                $("[name='GioiTinh']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiLamViecTuXa']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiLamViecTuXa']").parent().addClass("error").attr("title", "");
+            $("[name='TrangThaiLamViecTuXa']").focus(function () {
+                $("[name='TrangThaiLamViecTuXa']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiTiepXuc']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiTiepXuc']").parent().addClass("error").attr("title", "");
+            $("[name='TrangThaiTiepXuc']").focus(function () {
+                $("[name='TrangThaiTiepXuc']").parent().removeClass("error");
+            });
+        }
+        else {
+            var radioValue = $("input[name='TrangThaiTiepXuc']:checked").val();
+            if ($("#NgayTiepXuc").val() == "" && radioValue == "True") {
+                $("#NgayTiepXuc").addClass("error").attr("title", "");
+                flag = false;
+            }
+        }
+
+        if ($("[name='TrangThaiPhongToaTaiKhuVucMinhSong']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiPhongToaTaiKhuVucMinhSong']").parent().addClass("error").attr("title", "");
+            $("[name='TrangThaiPhongToaTaiKhuVucMinhSong']").focus(function () {
+                $("[name='TrangThaiPhongToaTaiKhuVucMinhSong']").parent().removeClass("error");
+            });
+        }
+        else {
+            var radioValue = $("input[name='TrangThaiPhongToaTaiKhuVucMinhSong']:checked").val();
+            if ($("#TuNgayPhongToa").val() == "" && radioValue == "True") {
+                $("#TuNgayPhongToa").addClass("error").attr("title", "");
+                flag = false;
+            }
+        }
+
+        if ($("[name='TrangThaiPhongToaGan']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiPhongToaGan']").parent().addClass("error").attr("title", "");
+            $("[name='TrangThaiPhongToaGan']").focus(function () {
+                $("[name='TrangThaiPhongToaGan']").parent().removeClass("error");
+            });
+        }
+        else {
+            var radioValue = $("input[name='TrangThaiPhongToaGan']:checked").val();
+            if ($("#TuNgayPhongToaGan").val() == "" && radioValue == "True") {
+                $("#TuNgayPhongToaGan").addClass("error").attr("title", "");
+                flag = false;
+            }
+
+        }
+
+        if ($("[name='TrangThaiLayMauXetNghiem']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiLayMauXetNghiem']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiLayMauXetNghiem']").focus(function () {
+                $("[name='TrangThaiLayMauXetNghiem']").parent().removeClass("error");
+            });
+        }
+        else {
+            var radioValue = $("input[name='TrangThaiLayMauXetNghiem']:checked").val();
+            if ($("#SoLanXetNghiem").val() == "" && radioValue == "True") {
+                $("#SoLanXetNghiem ").addClass("error").attr("title", "Vui lòng nhập số lần xét nghiệm.");
+                flag = false;
+            }
+            if ($("#NgayLayMau").val() == "" && radioValue == "True") {
+                $("#NgayLayMau").addClass("error").attr("title", "Vui lòng nhập ngày lấy mẫu.");
+                flag = false;
+            }
+        }
+
+        if ($("[name='TrangThaiHo']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiHo']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiHo']").focus(function () {
+                $("[name='TrangThaiHo']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiSotTren37']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiSotTren37']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiSotTren37']").focus(function () {
+                $("[name='TrangThaiSotTren37']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiKhoTho']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiKhoTho']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiKhoTho']").focus(function () {
+                $("[name='TrangThaiKhoTho']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiDauHong']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiDauHong']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiDauHong']").focus(function () {
+                $("[name='TrangThaiDauHong']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiMatViGiac']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiMatViGiac']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiMatViGiac']").focus(function () {
+                $("[name='TrangThaiMatViGiac']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiMatKhuuGiac']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiMatKhuuGiac']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiMatKhuuGiac']").focus(function () {
+                $("[name='TrangThaiMatKhuuGiac']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrieuChungKhac']:checked").length == 0) {
+            flag = false;
+            $("[name='TrieuChungKhac']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrieuChungKhac']").focus(function () {
+                $("[name='TrieuChungKhac']").parent().removeClass("error");
+            });
+        }
+
+
+        return flag;
+    }
+
+</script>
+
+<style>
+    #tbl-create td {
+        border: none;
+    }
+
+    #PhanTram {
+        position: absolute;
+        top: 50%;
+        right: 5px;
+        transform: translateY(-50%);
+        font-weight: bold;
+        font-size: 15px;
+    }
+
+    input[type=text], select.form-control {
+        height: 30px!important;
+    }
+
+    .radio-inline.radio-checkinput {
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0;
+    }
+
+        .radio-inline.radio-checkinput input {
+            width: auto;
+            margin-top: 0;
+            margin-right: 5px;
+        }
+
+    .container-box-check {
+        margin-top: 5px;
+    }
+
+    .item-trieu-chung {
+        display: flex;
+        align-items: center;
+        padding: 5px 0px;
+    }
+
+    .name-trieu-chung {
+        width: 120px;
+    }
+</style>
+
+@{
+    
+    string styleDisplay = "display:none";
+    if (Model.TrangThaiTiepXuc == true)
+    {
+        styleDisplay = string.Empty;
+    }
+    string stylePhonToan = "display:none";
+    if (Model.TrangThaiPhongToaTaiKhuVucMinhSong == true)
+    {
+        stylePhonToan = string.Empty;
+    }
+
+    string styleLayMauXetNghiem = "display:none";
+    if (Model.TrangThaiLayMauXetNghiem == true)
+    {
+        styleLayMauXetNghiem = string.Empty;
+    }
+    string stylePhongToanGan = "display:none";
+    if (Model.TrangThaiPhongToaGan == true)
+    {
+        stylePhongToanGan = string.Empty;
+    }
+}
+
+<form id="form-submit" class="form-horizontal" method="post">
+    <div id="container" class="custome_fieldSet">
+        <fieldset class="removeBorderFieldset">
+            <div id="tabs" style="width: 30%; height: auto; border: none; float: left; box-sizing: border-box; overflow: hidden; clear: none;" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+                <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
+                    <li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active ">
+                        <a><span><i class="fa fa-yelp" aria-hidden="true"></i>TỜ KHAI Y TẾ - THUẬN VIỆT</span></a></li>
+                </ul>
+            </div>
+            <table class="table table-striped table-hover table-condensed  TableCreatePNP TableMobileChild" id="tbl-create" style="position: relative">
+
+                <tr class="fullTDTRMobile">
+                    <td style="width: 15%" class="tdtitle">Mã phiếu kê khai</td>
+                    <td style="width: 35%">@Html.TextBoxFor(model => model.MaPhieu, new { @class = "form-control", @readonly = true })</td>
+                    <td style="width: 15%" class="tdtitle">Ngày kê khai</td>
+                    <td style="width: 35%">
+                        @Html.TextBoxFor(model => model.NgayLap, "{0: dd/MM/yyyy}", new { @readonly = true, @class = "form-control datepicker" })
+                    </td>
+
+                </tr>
+
+
+                <tr class="fullTDTRMobile">
+                    <td style="width: 15%" class="tdtitle">Mã nhân viên khai báo</td>
+                    <td style="width: 35%">@Html.TextBoxFor(model => model.MaNhanVienKk, new { @class = "form-control", @readonly = true, required = "required" })</td>
+                    <td style="width: 15%" class="tdtitle">Tên nhân viên khai báo </td>
+                    <td style="width: 35%">
+                        @Html.TextBoxFor(model => model.TenNhanVienKK, new { @class = "form-control", @readonly = true, @style = "width:86%;float:left;margin-right: 5px;", required = "required" })
+                        <button class="btn btn-info" id="ChooseNV" style="margin-top: 4px;" type="button">...</button>
+
+                    </td>
+                </tr>
+                <tr class="fullTDTRMobile">
+                    <td class="tdtitle">Giới tính</td>
+                    <td>
+                        <label class="radio-inline radio-checkinput">
+                            @Html.RadioButtonFor(model => model.GioiTinh, true) Nam
+                        </label>
+                        <label class="radio-inline radio-checkinput">
+                            @Html.RadioButtonFor(model => model.GioiTinh, false) Nữ
+                        </label>
+                    </td>
+
+                    <td class="tdtitle">Điện thoại </td>
+                    <td>@Html.TextBoxFor(model => model.DienThoai, new { @class = "form-control" })</td>
+                </tr>
+
+                <tr>
+                    <td class="tdtitle">Số nhà, Đường </td>
+                    <td colspan="3">@Html.TextBoxFor(model => model.DiaChiHienNay, new { @class = "form-control" })</td>
+                </tr>
+                <tr>
+                    <td class="tdtitle">Phường/ Xã </td>
+                    <td colspan="3">@Html.TextBoxFor(model => model.TenPhuongXa, new { @class = "form-control" })</td>
+                </tr>
+                <tr>
+
+                    <td class="tdtitle">Tỉnh/ Thành phố </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.MaTinhThanh, ViewBag.TinhThanh as SelectList, new { @class = "form-control", required = "required" })
+                    </td>
+                    <td class="tdtitle">Quận/ Huyện </td>
+                    <td>
+                        @Html.DropDownListFor(model => model.MaQuanHuyen, ViewBag.QuanHuyen as SelectList, new { @class = "form-control", required = "required" })
+                    </td>
+                </tr>
+
+                <tr>
+                    <td class="tdtitle"></td>
+                    <td colspan="3">
+                        <div>
+                            <span style="font-weight: bold">Công việc của Anh Chị có thể triển khai làm việc từ xa (online) được không?</span>
+                        </div>
+                        <div class="container-box-check">
+                            <label class="radio-inline radio-checkinput">
+                                @Html.RadioButtonFor(model => model.TrangThaiLamViecTuXa, true) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput">
+                                @Html.RadioButtonFor(model => model.TrangThaiLamViecTuXa, false) Không
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tdtitle"></td>
+                    <td colspan="3">
+                        <div>
+                            <span style="font-weight: bold">Anh Chị Có tiếp xúc với người được xác định hoặc nghi ngờ nhiễm COVID-19 trong vòng 14 ngày qua không?</span>
+                        </div>
+                        <div class="container-box-check">
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiTiepXuc, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiTiepXuc, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="trNgayTiepXuc"  style="@(styleDisplay)">
+                    <td class="tdtitle">Ngày tiếp xúc</td>
+                    <td>@Html.TextBoxFor(model => model.NgayTiepXuc, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+                    <td class="tdtitle"></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="tdtitle"></td>
+                    <td colspan="3">
+                        <div>
+                            <span style="font-weight: bold">Khu vực Anh Chị đang sống hiện tại có bị phong tỏa, cách ly không?</span>
+                        </div>
+                        <div class="container-box-check">
+                            <label class="radio-inline radio-checkinput">
+                                @Html.RadioButtonFor(model => model.TrangThaiPhongToaTaiKhuVucMinhSong, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput">
+                                @Html.RadioButtonFor(model => model.TrangThaiPhongToaTaiKhuVucMinhSong, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="trPhongToan" style="@(stylePhonToan)">
+                    <td class="tdtitle">Thời gian phong tỏa (Từ ngày)</td>
+                    <td>@Html.TextBoxFor(model => model.TuNgayPhongToa, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+                    <td class="tdtitle">Đến ngày</td>
+                    <td>@Html.TextBoxFor(model => model.DenNgayPhongToa, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+                </tr>
+                <tr>
+                    <td class="tdtitle"></td>
+                    <td colspan="3">
+                        <div>
+                            <span style="font-weight: bold">Khu vực Anh Chị đang sống hiện tại có GẦN nơi có bị phong tỏa, cách ly không? (cùng/gần đường, khu phố, chung cư)?</span>
+                        </div>
+                        <div class="container-box-check">
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiPhongToaGan, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiPhongToaGan, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="trGhiChuPhongToa" style="@(stylePhongToanGan)">
+                    <td class="tdtitle">Thời gian phong tỏa (Từ ngày)</td>
+                    <td>@Html.TextBoxFor(model => model.TuNgayPhongToaGan, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+                    <td class="tdtitle">Đến ngày</td>
+                    <td>@Html.TextBoxFor(model => model.DenNgayPhongToaGan, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+                </tr>
+                <tr class="trGhiChuPhongToa" style="@(stylePhongToanGan)">
+                    <td class="tdtitle">Ghi chú</td>
+                    <td colspan="3">
+                        @Html.TextBoxFor(model => model.GhiChuPhongToaGan, new { @class = "form-control" })
+                    </td>
+                </tr>
+                <tr>
+                    <td class="tdtitle"></td>
+                    <td colspan="3">
+                        <div>
+                            <span style="font-weight: bold">Trong vòng 14 ngày qua Anh Chị có từng được lấy mẫu xét nghiệm Covid-19 không?</span>
+                        </div>
+                        <div class="container-box-check">
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiLayMauXetNghiem, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiLayMauXetNghiem, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="trLayMauXetNghiem" style="@(styleLayMauXetNghiem)">
+                    <td class="tdtitle">Số lần xét nghiệm</td>
+                    <td>@Html.TextBoxFor(model => model.SoLanXetNghiem, new { @class = "form-control" })</td>
+                    <td class="tdtitle">Ngày lấy mẫu gần nhất</td>
+                    <td>@Html.TextBoxFor(model => model.NgayLayMau, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+                </tr>
+                <tr>
+                    <td class="tdtitle"></td>
+                    <td colspan="3">
+                        <div>
+                            <span style="font-weight: bold">Hiện nay Anh Chị có triệu chứng nào dưới đây không?</span>
+                        </div>
+                        <div class="item-trieu-chung">
+                            <div class="name-trieu-chung">Ho</div>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiHo, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiHo, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                        <div class="item-trieu-chung">
+                            <div class="name-trieu-chung">Sốt trên 37 độ</div>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiSotTren37, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiSotTren37, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                        <div class="item-trieu-chung">
+                            <div class="name-trieu-chung">Khó thở</div>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiKhoTho, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiKhoTho, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                        <div class="item-trieu-chung">
+                            <div class="name-trieu-chung">Đau họng</div>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiDauHong, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiDauHong, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                        <div class="item-trieu-chung">
+                            <div class="name-trieu-chung">Mất vị giác</div>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiMatViGiac, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiMatViGiac, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                        <div class="item-trieu-chung">
+                            <div class="name-trieu-chung">Mất khứu giác</div>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiMatKhuuGiac, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrangThaiMatKhuuGiac, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                        <div class="item-trieu-chung">
+                            <div class="name-trieu-chung">Triệu chứng khác</div>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrieuChungKhac, true, new { style = "width:auto" }) Có
+                            </label>
+                            <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                                @Html.RadioButtonFor(model => model.TrieuChungKhac, false, new { style = "width:auto" }) Không
+                            </label>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+            <div style="font-weight: bold; font-style: italic; color: red; margin-top: 10px;">
+                Tôi cam kết thông tin trên là đúng sự thật và Tôi sẽ chịu trách nhiệm hoàn toàn về thông tin đã cung cấp.
+            </div>
+            <div style="text-align: right; margin-bottom: 10px; margin-top: 10px">
+                @{
+                    BatDongSan.Models.HeThong.Sys_User user1 = new BatDongSan.Models.HeThong.Sys_User();
+                    if (Session["User"] != null)
+                    {
+                        user1 = (BatDongSan.Models.HeThong.Sys_User)Session["User"];
+                    }
+                }
+                @if ((user1.manv == Model.MaNhanVienLapPhieu || user1.manv == Model.MaNhanVienKk) && Model.XacNhan == false)
+                {
+                    <button class="btn btn-info" id="btnSubmit" type="button">Lưu </button>
+                    <button class="btn btn-info" id="btnXacNhan" type="button">Gửi </button>
+                }
+
+                <button class="btn btn-info" type="button" id="btnTroVe">Trở về </button>
+            </div>
+        </fieldset>
+
+    </div>
+</form>
+
+<div id="myModalChonPhongBan" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container" style="width: 98%">
+                    <div class="row">
+                        <div id="filter-panel" class="filter-panel">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+
+    </div>
+</div>

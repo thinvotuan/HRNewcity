@@ -1,0 +1,380 @@
+﻿@using BatDongSan.Models.PhieuDeNghi;
+@model PhieuKeKhaiYTeModel
+@{
+    ViewBag.Title = "TỜ KHAI Y TẾ - THUẬN VIỆT";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="~/Content/summernote/summernote.css" />
+<script src="~/Content/summernote/summernote.js"></script>
+<script src="~/Scripts/jquery.validate.min.js"></script>
+<script src="~/Content/bootstrap/js/bootstrap.min.js"></script>
+<script src="~/Scripts/additional-methods.min.js"></script>
+<script src="~/Scripts/autoNumeric.js"></script>
+<script src="~/Scripts/batdongsan.validate.js"></script>
+<script src="~/Scripts/moment.min.js"></script>
+<script src="~/Scripts/vi.js"></script>
+<script src="~/Scripts/bootstrap-datetimepicker.min.js"></script>
+<link rel="stylesheet" href="~/Content/bootstrap-datetimepicker.min.css" />
+<script src="~/Scripts/jquery.unobtrusive-ajax.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $(".numberinput").autoNumeric('init', { mDec: 1, mNum: 3, lZero: 'deny', aSep: ',', aDec: '.', pSign: 's', vMin: '-1000' });
+        $(".numberinputInt").autoNumeric('init', { lZero: 'deny', mDec: 0, pSign: 's', aSep: ',', aDec: '.' });
+        $("#btnTroVe").click(function () {
+            var url = "@Url.Action("Index")";
+            location.href = url;
+
+        });
+
+        $(".datepicker").datetimepicker({
+            locale: 'vi',
+            format: 'DD/MM/YYYY',
+            useCurrent: false
+        });
+
+        $("#btnSubmit").click(function () {
+            var flag = CheckForm();
+            if (flag) {
+                $("#form-submit").submit();
+            }
+        });
+
+        $("#MaTinhThanh").change(function () {
+            var quanHuyen = $("#MaQuanHuyen");
+            quanHuyen.empty();
+            $.ajax({
+                url: "/PhieuKeKhaiYTe/GetQuanHuyen/" + this.value,
+                type: "POST",
+                dataType: "json",
+                success: function (data) {
+                    var textAppend = "<option value=''>[Vui lòng chọn quận/huyện]</option>";
+                    $.each(data, function (i, quanHuyen) {
+                        textAppend += "<option value=" + quanHuyen.id + ">" + quanHuyen.tenQuanHuyen + "</option>";
+                    });
+                    quanHuyen.append(textAppend);
+                }
+            });
+        });
+
+        $("#ChooseNV").click(function () {
+            ChonNhanVien();
+        });
+
+        $("input[name='TrangThaiTiepXuc']").click(function () {
+            var radioValue = $("input[name='TrangThaiTiepXuc']:checked").val();
+            if (radioValue == "True") {
+                $(".trNgayTiepXuc").show();
+            }
+            else {
+                $(".trNgayTiepXuc").hide();
+            }
+        });
+
+        $("input[name='TrangThaiPhongToaTaiKhuVucMinhSong']").click(function () {
+            var radioValue = $("input[name='TrangThaiPhongToaTaiKhuVucMinhSong']:checked").val();
+            if (radioValue == "True") {
+                $(".trPhongToan").show();
+            }
+            else {
+                $(".trPhongToan").hide();
+            }
+        });
+
+        $("input[name='TrangThaiLayMauXetNghiem']").click(function () {
+            var radioValue = $("input[name='TrangThaiLayMauXetNghiem']:checked").val();
+            if (radioValue == "True") {
+                $(".trLayMauXetNghiem").show();
+            }
+            else {
+                $(".trLayMauXetNghiem").hide();
+            }
+        });
+
+        $("input[name='TrangThaiPhongToaGan']").click(function () {
+            var radioValue = $("input[name='TrangThaiPhongToaGan']:checked").val();
+            if (radioValue == "True") {
+                $(".trGhiChuPhongToa").show();
+            }
+            else {
+                $(".trGhiChuPhongToa").hide();
+            }
+        });
+
+
+
+    });
+
+
+    function ChonNhanVien() {
+        var url = ('@Url.Action("DanhSachNVPB/", "PhieuKeKhaiYTe")');
+        PopUpManager(url, "DUYET", 800, 500);
+    }
+
+    function PopUpManager(url, title, w, h) {
+        var left = (screen.width / 2) - (w / 2);
+        var top = (screen.height / 2) - (h / 2);
+        var targetWin = window.open(url, title, 'width=' + w + ', height=' + h + ', top=' + top + ', left=' + left);
+    }
+
+    function CheckForm() {
+        var flag = true;
+        if ($("#DiaChiHienNay").val() == "") {
+            $("#DiaChiHienNay").addClass("error").attr("title", "Xin vui lòng nhập địa chỉ hiện nay");
+            flag = false;
+
+        }
+
+        if ($("#MaTinhThanh").val() == "") {
+            $("#MaTinhThanh").addClass("error").attr("title", "Vui lòng tỉnh thành.");
+            flag = false;
+        }
+
+        if ($("#MaQuanHuyen").val() == "0" || $("#MaQuanHuyen").val() == "") {
+            $("#MaQuanHuyen").addClass("error").attr("title", "Vui lòng chọn quận huyện.");
+            flag = false;
+        }
+
+        if ($("#TenPhuongXa").val() == "") {
+            $("#TenPhuongXa").addClass("error").attr("title", "Vui lòng nhập phường xã.");
+            flag = false;
+        }
+
+        if ($("#DienThoai").val() == "") {
+            $("#DienThoai").addClass("error").attr("title", "Vui lòng nhập điện thoại.");
+            flag = false;
+        }
+
+        if ($("[name='GioiTinh']:checked").length == 0) {
+            flag = false;
+            $("[name='GioiTinh']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='GioiTinh']").focus(function () {
+                $("[name='GioiTinh']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiLamViecTuXa']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiLamViecTuXa']").parent().addClass("error").attr("title", "");
+            $("[name='TrangThaiLamViecTuXa']").focus(function () {
+                $("[name='TrangThaiLamViecTuXa']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiTiepXuc']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiTiepXuc']").parent().addClass("error").attr("title", "");
+            $("[name='TrangThaiTiepXuc']").focus(function () {
+                $("[name='TrangThaiTiepXuc']").parent().removeClass("error");
+            });
+        }
+        else {
+            var radioValue = $("input[name='TrangThaiTiepXuc']:checked").val();
+            if ($("#NgayTiepXuc").val() == "" && radioValue == "True") {
+                $("#NgayTiepXuc").addClass("error").attr("title", "");
+                flag = false;
+            }
+        }
+
+        if ($("[name='TrangThaiPhongToaTaiKhuVucMinhSong']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiPhongToaTaiKhuVucMinhSong']").parent().addClass("error").attr("title", "");
+            $("[name='TrangThaiPhongToaTaiKhuVucMinhSong']").focus(function () {
+                $("[name='TrangThaiPhongToaTaiKhuVucMinhSong']").parent().removeClass("error");
+            });
+        }
+        else {
+            var radioValue = $("input[name='TrangThaiPhongToaTaiKhuVucMinhSong']:checked").val();
+            if ($("#TuNgayPhongToa").val() == "" && radioValue == "True") {
+                $("#TuNgayPhongToa").addClass("error").attr("title", "");
+                flag = false;
+            }
+        }
+
+        if ($("[name='TrangThaiPhongToaGan']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiPhongToaGan']").parent().addClass("error").attr("title", "");
+            $("[name='TrangThaiPhongToaGan']").focus(function () {
+                $("[name='TrangThaiPhongToaGan']").parent().removeClass("error");
+            });
+        }
+        else {
+            var radioValue = $("input[name='TrangThaiPhongToaGan']:checked").val();
+            if ($("#TuNgayPhongToaGan").val() == "" && radioValue == "True") {
+                $("#TuNgayPhongToaGan").addClass("error").attr("title", "");
+                flag = false;
+            }
+
+        }
+
+        if ($("[name='TrangThaiLayMauXetNghiem']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiLayMauXetNghiem']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiLayMauXetNghiem']").focus(function () {
+                $("[name='TrangThaiLayMauXetNghiem']").parent().removeClass("error");
+            });
+        }
+        else {
+            var radioValue = $("input[name='TrangThaiLayMauXetNghiem']:checked").val();
+            if ($("#SoLanXetNghiem").val() == "" && radioValue == "True") {
+                $("#SoLanXetNghiem ").addClass("error").attr("title", "Vui lòng nhập số lần xét nghiệm.");
+                flag = false;
+            }
+            if ($("#NgayLayMau").val() == "" && radioValue == "True") {
+                $("#NgayLayMau").addClass("error").attr("title", "Vui lòng nhập ngày lấy mẫu.");
+                flag = false;
+            }
+        }
+
+        if ($("[name='TrangThaiHo']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiHo']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiHo']").focus(function () {
+                $("[name='TrangThaiHo']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiSotTren37']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiSotTren37']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiSotTren37']").focus(function () {
+                $("[name='TrangThaiSotTren37']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiKhoTho']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiKhoTho']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiKhoTho']").focus(function () {
+                $("[name='TrangThaiKhoTho']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiDauHong']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiDauHong']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiDauHong']").focus(function () {
+                $("[name='TrangThaiDauHong']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiMatViGiac']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiMatViGiac']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiMatViGiac']").focus(function () {
+                $("[name='TrangThaiMatViGiac']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrangThaiMatKhuuGiac']:checked").length == 0) {
+            flag = false;
+            $("[name='TrangThaiMatKhuuGiac']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrangThaiMatKhuuGiac']").focus(function () {
+                $("[name='TrangThaiMatKhuuGiac']").parent().removeClass("error");
+            });
+        }
+
+        if ($("[name='TrieuChungKhac']:checked").length == 0) {
+            flag = false;
+            $("[name='TrieuChungKhac']").parent().addClass("error").attr("title", "Vui lòng nhập check chọn giới tính.");
+            $("[name='TrieuChungKhac']").focus(function () {
+                $("[name='TrieuChungKhac']").parent().removeClass("error");
+            });
+        }
+
+
+        return flag;
+    }
+
+</script>
+
+<style>
+    #tbl-create td {
+        border: none;
+    }
+
+    #PhanTram {
+        position: absolute;
+        top: 50%;
+        right: 5px;
+        transform: translateY(-50%);
+        font-weight: bold;
+        font-size: 15px;
+    }
+
+    input[type=text], select.form-control {
+        height: 30px!important;
+    }
+
+    .radio-inline.radio-checkinput {
+        font-size: 13px;
+        display: inline-flex;
+        align-items: center;
+        padding: 0;
+    }
+
+        .radio-inline.radio-checkinput input {
+            width: auto;
+            margin-top: 0;
+            margin-right: 5px;
+        }
+
+    .container-box-check {
+        margin-top: 5px;
+    }
+
+    .item-trieu-chung {
+        display: flex;
+        align-items: center;
+        padding: 5px 0px;
+    }
+
+    .name-trieu-chung {
+        width: 120px;
+    }
+</style>
+
+
+<form id="form-submit" class="form-horizontal" method="post">
+    <div id="container" class="custome_fieldSet">
+        <fieldset class="removeBorderFieldset">
+            <div id="tabs" style="width: 30%; height: auto; border: none; float: left; box-sizing: border-box; overflow: hidden; clear: none;" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+                <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all">
+                    <li class="ui-state-default ui-corner-top ui-tabs-selected ui-state-active ">
+                        <a><span><i class="fa fa-yelp" aria-hidden="true"></i>TỜ KHAI Y TẾ - THUẬN VIỆT</span></a></li>
+                </ul>
+            </div>
+            <div id="loadPhieuCu">
+                @{Html.RenderPartial("LoadPhieuCu", Model);}
+            </div>
+
+            <div style="text-align: right; margin-bottom: 10px; margin-top: 10px">
+                <button class="btn btn-info" id="btnSubmit" type="button">Lưu </button>
+                <button class="btn btn-info" type="button" id="btnTroVe">Trở về </button>
+            </div>
+        </fieldset>
+
+    </div>
+</form>
+
+<div id="myModalChonPhongBan" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="container" style="width: 98%">
+                    <div class="row">
+                        <div id="filter-panel" class="filter-panel">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+
+    </div>
+</div>

@@ -1,0 +1,270 @@
+﻿@using BatDongSan.Models.PhieuDeNghi;
+@model PhieuKeKhaiYTeModel
+
+@{
+    
+    string styleDisplay = "display:none";
+    if (Model.TrangThaiTiepXuc == true)
+    {
+        styleDisplay = string.Empty;
+    }
+    string stylePhonToan = "display:none";
+    if (Model.TrangThaiPhongToaTaiKhuVucMinhSong == true)
+    {
+        stylePhonToan = string.Empty;
+    }
+
+    string styleLayMauXetNghiem = "display:none";
+    if (Model.TrangThaiLayMauXetNghiem == true)
+    {
+        styleLayMauXetNghiem = string.Empty;
+    }
+    string stylePhongToanGan = "display:none";
+    if (Model.TrangThaiPhongToaGan == true)
+    {
+        stylePhongToanGan = string.Empty;
+    }
+}
+<table class="table table-striped table-hover table-condensed  TableCreatePNP TableMobileChild" id="tbl-create" style="position: relative">
+
+    <tr class="fullTDTRMobile">
+        <td style="width: 15%" class="tdtitle">Mã phiếu kê khai</td>
+        <td style="width: 35%">@Html.TextBoxFor(model => model.MaPhieu, new { @class = "form-control", @readonly = true })</td>
+        <td style="width: 15%" class="tdtitle">Ngày kê khai</td>
+        <td style="width: 35%">
+            @Html.TextBoxFor(model => model.NgayLap, "{0: dd/MM/yyyy}", new { @readonly = true, @class = "form-control datepicker" })
+        </td>
+
+    </tr>
+
+
+    <tr class="fullTDTRMobile">
+        <td style="width: 15%" class="tdtitle">Mã nhân viên khai báo</td>
+        <td style="width: 35%">@Html.TextBoxFor(model => model.MaNhanVienKk, new { @class = "form-control", @readonly = true, required = "required" })</td>
+        <td style="width: 15%" class="tdtitle">Tên nhân viên khai báo </td>
+        <td style="width: 35%">
+            @Html.TextBoxFor(model => model.TenNhanVienKK, new { @class = "form-control", @readonly = true, @style = "width:86%;float:left;margin-right: 5px;", required = "required" })
+            <button class="btn btn-info" id="ChooseNV" style="margin-top: 4px;" type="button">...</button>
+
+        </td>
+    </tr>
+    <tr class="fullTDTRMobile">
+        <td class="tdtitle">Giới tính</td>
+        <td>
+            <label class="radio-inline radio-checkinput">
+                @Html.RadioButtonFor(model => model.GioiTinh, true) Nam
+            </label>
+            <label class="radio-inline radio-checkinput">
+                @Html.RadioButtonFor(model => model.GioiTinh, false) Nữ
+            </label>
+        </td>
+
+        <td class="tdtitle">Điện thoại </td>
+        <td>@Html.TextBoxFor(model => model.DienThoai, new { @class = "form-control" })</td>
+    </tr>
+
+    <tr>
+        <td class="tdtitle">Số nhà, Đường </td>
+        <td colspan="3">@Html.TextBoxFor(model => model.DiaChiHienNay, new { @class = "form-control" })</td>
+    </tr>
+    <tr>
+        <td class="tdtitle">Phường/ Xã </td>
+        <td colspan="3">@Html.TextBoxFor(model => model.TenPhuongXa, new { @class = "form-control" })</td>
+    </tr>
+    <tr>
+
+        <td class="tdtitle">Tỉnh/ Thành phố </td>
+        <td>
+            @Html.DropDownListFor(model => model.MaTinhThanh, ViewBag.TinhThanh as SelectList, new { @class = "form-control", required = "required" })
+        </td>
+        <td class="tdtitle">Quận/ Huyện </td>
+        <td>
+            @Html.DropDownListFor(model => model.MaQuanHuyen, ViewBag.QuanHuyen as SelectList, new { @class = "form-control", required = "required" })
+        </td>
+    </tr>
+
+    <tr>
+        <td class="tdtitle"></td>
+        <td colspan="3">
+            <div>
+                <span style="font-weight: bold">Công việc của Anh Chị có thể triển khai làm việc từ xa (online) được không?</span>
+            </div>
+            <div class="container-box-check">
+                <label class="radio-inline radio-checkinput">
+                    @Html.RadioButtonFor(model => model.TrangThaiLamViecTuXa, true) Có
+                </label>
+                <label class="radio-inline radio-checkinput">
+                    @Html.RadioButtonFor(model => model.TrangThaiLamViecTuXa, false) Không
+                </label>
+            </div>
+        </td>
+    </tr>
+    <tr>
+        <td class="tdtitle"></td>
+        <td colspan="3">
+            <div>
+                <span style="font-weight: bold">Anh Chị Có tiếp xúc với người được xác định hoặc nghi ngờ nhiễm COVID-19 trong vòng 14 ngày qua không?</span>
+            </div>
+            <div class="container-box-check">
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiTiepXuc, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiTiepXuc, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+        </td>
+    </tr>
+    <tr class="trNgayTiepXuc"  style="@(styleDisplay)">
+        <td class="tdtitle">Ngày tiếp xúc</td>
+        <td>@Html.TextBoxFor(model => model.NgayTiepXuc, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+        <td class="tdtitle"></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td class="tdtitle"></td>
+        <td colspan="3">
+            <div>
+                <span style="font-weight: bold">Khu vực Anh Chị đang sống hiện tại có bị phong tỏa, cách ly không?</span>
+            </div>
+            <div class="container-box-check">
+                <label class="radio-inline radio-checkinput">
+                    @Html.RadioButtonFor(model => model.TrangThaiPhongToaTaiKhuVucMinhSong, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput">
+                    @Html.RadioButtonFor(model => model.TrangThaiPhongToaTaiKhuVucMinhSong, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+        </td>
+    </tr>
+    <tr class="trPhongToan" style="@(stylePhonToan)">
+        <td class="tdtitle">Thời gian phong tỏa (Từ ngày)</td>
+        <td>@Html.TextBoxFor(model => model.TuNgayPhongToa, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+        <td class="tdtitle">Đến ngày</td>
+        <td>@Html.TextBoxFor(model => model.DenNgayPhongToa, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+    </tr>
+    <tr>
+        <td class="tdtitle"></td>
+        <td colspan="3">
+            <div>
+                <span style="font-weight: bold">Khu vực Anh Chị đang sống hiện tại có GẦN nơi có bị phong tỏa, cách ly không? (cùng/gần đường, khu phố, chung cư)?</span>
+            </div>
+            <div class="container-box-check">
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiPhongToaGan, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiPhongToaGan, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+        </td>
+    </tr>
+    <tr class="trGhiChuPhongToa" style="@(stylePhongToanGan)">
+        <td class="tdtitle">Thời gian phong tỏa (Từ ngày)</td>
+        <td>@Html.TextBoxFor(model => model.TuNgayPhongToaGan, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+        <td class="tdtitle">Đến ngày</td>
+        <td>@Html.TextBoxFor(model => model.DenNgayPhongToaGan, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+    </tr>
+    <tr class="trGhiChuPhongToa" style="@(stylePhongToanGan)">
+        <td class="tdtitle">Ghi chú</td>
+        <td colspan="3">
+            @Html.TextBoxFor(model => model.GhiChuPhongToaGan, new { @class = "form-control" })
+        </td>
+    </tr>
+    <tr>
+        <td class="tdtitle"></td>
+        <td colspan="3">
+            <div>
+                <span style="font-weight: bold">Trong vòng 14 ngày qua Anh Chị có từng được lấy mẫu xét nghiệm Covid-19 không?</span>
+            </div>
+            <div class="container-box-check">
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiLayMauXetNghiem, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiLayMauXetNghiem, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+        </td>
+    </tr>
+    <tr class="trLayMauXetNghiem" style="@(styleLayMauXetNghiem)">
+        <td class="tdtitle">Số lần xét nghiệm</td>
+        <td>@Html.TextBoxFor(model => model.SoLanXetNghiem, new { @class = "form-control" })</td>
+        <td class="tdtitle">Ngày lấy mẫu gần nhất</td>
+        <td>@Html.TextBoxFor(model => model.NgayLayMau, "{0: dd/MM/yyyy}", new { @class = "form-control datepicker" })</td>
+    </tr>
+    <tr>
+        <td class="tdtitle"></td>
+        <td colspan="3">
+            <div>
+                <span style="font-weight: bold">Hiện nay Anh Chị có triệu chứng nào dưới đây không?</span>
+            </div>
+            <div class="item-trieu-chung">
+                <div class="name-trieu-chung">Ho</div>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiHo, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiHo, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+            <div class="item-trieu-chung">
+                <div class="name-trieu-chung">Sốt trên 37 độ</div>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiSotTren37, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiSotTren37, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+            <div class="item-trieu-chung">
+                <div class="name-trieu-chung">Khó thở</div>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiKhoTho, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiKhoTho, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+            <div class="item-trieu-chung">
+                <div class="name-trieu-chung">Đau họng</div>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiDauHong, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiDauHong, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+            <div class="item-trieu-chung">
+                <div class="name-trieu-chung">Mất vị giác</div>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiMatViGiac, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiMatViGiac, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+            <div class="item-trieu-chung">
+                <div class="name-trieu-chung">Mất khứu giác</div>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiMatKhuuGiac, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrangThaiMatKhuuGiac, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+            <div class="item-trieu-chung">
+                <div class="name-trieu-chung">Triệu chứng khác</div>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrieuChungKhac, true, new { style = "width:auto" }) Có
+                </label>
+                <label class="radio-inline radio-checkinput" style="font-size: 13px">
+                    @Html.RadioButtonFor(model => model.TrieuChungKhac, false, new { style = "width:auto" }) Không
+                </label>
+            </div>
+        </td>
+    </tr>
+</table>
+<div style="font-weight: bold; font-style: italic; color: red; margin-top: 10px;">
+    Tôi cam kết thông tin trên là đúng sự thật và Tôi sẽ chịu trách nhiệm hoàn toàn về thông tin đã cung cấp.
+</div>
